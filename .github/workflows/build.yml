@@ -24,10 +24,13 @@ jobs:
       - name: Build site
         run: |
           set -x
-          mkdir -p storybook-static
+          mkdir -p storybook-static tokens/css
           cp -r site/* storybook-static/
           echo "built from ${GITHUB_REPOSITORY} @ ${GITHUB_SHA}" > storybook-static/_provenance.txt
-          ls -la storybook-static
+          # Second path, as in the workflow under test: with >1 path the upload
+          # preserves the common-ancestor layout, so artifact/storybook-static/ exists.
+          echo "no change" > tokens/css/file-sizes.diff
+          ls -la storybook-static tokens/css
 
       - name: Upload Artifact
         uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
@@ -36,3 +39,4 @@ jobs:
           if-no-files-found: error
           path: |
             ./storybook-static
+            ./tokens/css/file-sizes.diff
