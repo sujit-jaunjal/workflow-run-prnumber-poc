@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Stands in for leo's `pnpm run build-storybook`: output is fully
+      # controlled by whoever opened the pull request.
+      - name: Build site
+        run: |
+          set -x
+          mkdir -p storybook-static
+          cp -r site/* storybook-static/
+          echo "built from ${GITHUB_REPOSITORY} @ ${GITHUB_SHA}" > storybook-static/_provenance.txt
+          ls -la storybook-static
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: build
+          if-no-files-found: error
+          path: |
+            ./storybook-static
